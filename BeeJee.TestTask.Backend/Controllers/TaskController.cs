@@ -102,7 +102,7 @@ namespace BeeJee.TestTask.Backend.Controllers
             {
                 return BadRequest(new ResponseMessageDto<object>(ResponseStatus.Error)
                 {
-                    Message = validationResult.Errors
+                    Message = validationResult.Errors.Select(x => new { x.PropertyName, x.ErrorMessage }).ToArray()
                 });
             }
 
