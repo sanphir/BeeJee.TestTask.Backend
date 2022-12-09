@@ -62,7 +62,7 @@ namespace BeeJee.TestTask.Backend.Controllers
                     Message = new TasksResponseDto
                     {
                         Tasks = Array.Empty<TaskDto>(),
-                        total_task_count = totalCount,
+                        TotalTaskCount = totalCount,
                     }
                 });
             }
@@ -89,7 +89,7 @@ namespace BeeJee.TestTask.Backend.Controllers
                 Message = new TasksResponseDto
                 {
                     Tasks = mapedResult,
-                    total_task_count = totalCount,
+                    TotalTaskCount = totalCount,
                 }
             });
         }

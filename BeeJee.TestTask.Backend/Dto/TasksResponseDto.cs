@@ -1,8 +1,13 @@
-﻿namespace BeeJee.TestTask.Backend.Dto
+﻿using System.Text.Json.Serialization;
+
+namespace BeeJee.TestTask.Backend.Dto
 {
     public class TasksResponseDto
     {
+        [JsonPropertyName("tasks")]
         public IEnumerable<TaskDto> Tasks { get; set; }
-        public int total_task_count { get; set; }
+
+        [JsonPropertyName("total_task_count")]
+        public int TotalTaskCount { get; set; }
     }
 }

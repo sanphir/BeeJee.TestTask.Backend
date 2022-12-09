@@ -1,4 +1,5 @@
-﻿namespace BeeJee.TestTask.Backend.Dto
+﻿using System.Text.Json.Serialization;
+namespace BeeJee.TestTask.Backend.Dto
 {
     public enum ResponseStatus
     {
@@ -8,6 +9,7 @@
 
     public class ResponseDto
     {
+        [JsonPropertyName("status")]
         public string Status { get; private set; }
         public ResponseDto(ResponseStatus status)
         {
@@ -19,7 +21,8 @@
     {
         /// <summary>
         /// Response data
-        /// </summary>
+        /// </summary>       
+        [JsonPropertyName("message")]
         public T? Message { get; set; }
 
         public ResponseMessageDto(ResponseStatus status) : base(status)
