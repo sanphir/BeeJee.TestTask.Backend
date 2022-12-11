@@ -1,5 +1,4 @@
-﻿using BeeJee.TestTask.Backend.Config;
-using BeeJee.TestTask.Backend.Dto;
+﻿using BeeJee.TestTask.Backend.Dto;
 using BeeJee.TestTask.Backend.Extensions;
 using BeeJee.TestTask.DAL;
 using BeeJee.TestTask.DAL.Models;
@@ -8,7 +7,6 @@ using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System.ComponentModel;
 
 namespace BeeJee.TestTask.Backend.Controllers
@@ -18,13 +16,11 @@ namespace BeeJee.TestTask.Backend.Controllers
     public class TaskController : ControllerBase
     {
         private readonly TestTaskDbContext _context;
-        private readonly PageOptions _pageOptions;
         private readonly IValidator<NewTaskDto> _validator;
         private readonly ILogger<TaskController> _logger;
-        public TaskController(TestTaskDbContext context, IOptions<PageOptions> pageOptions, IValidator<NewTaskDto> validator, ILogger<TaskController> logger)
+        public TaskController(TestTaskDbContext context, IValidator<NewTaskDto> validator, ILogger<TaskController> logger)
         {
             _context = context;
-            _pageOptions = pageOptions.Value;
             _validator = validator;
             _logger = logger;
         }
@@ -50,10 +46,18 @@ namespace BeeJee.TestTask.Backend.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ResponseMessageDto<object>>> Get(string sort_field, string sort_direction, int page, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<ResponseMessageDto<object>>> Get(string sort_field, string sort_direction, int page, int pageSize, CancellationToken cancellationToken = default)
         {
+            if (pageSize <= 0)
+            {
+                return BadRequest(new ResponseMessageDto<object>(ResponseStatus.Error)
+                {
+                    Message = $"Неверный размер страниц {pageSize}"
+                });
+            }
+
             var totalCount = await _context.Tasks.CountAsync(cancellationToken);
-            var skip = _pageOptions.PageSize * (page - 1);
+            var skip = pageSize * (page - 1);
 
             if ((page <= 0) || (skip > totalCount))
             {
@@ -79,7 +83,7 @@ namespace BeeJee.TestTask.Backend.Controllers
 
             var result = await ordered.AsNoTracking()
                 .Skip(skip)
-                .Take(_pageOptions.PageSize)
+                .Take(pageSize)
                 .ToListAsync(cancellationToken);
 
             var mapedResult = result.Select(e => e.Adapt<TaskModel, TaskDto>());
@@ -120,7 +124,7 @@ namespace BeeJee.TestTask.Backend.Controllers
 
         [Authorize]
         [HttpPost("edit/{id}")]
-        public async Task<ActionResult<ResponseMessageDto<object>>> Edit(string text, TaskModelStatus status, int id, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<ResponseMessageDto<object>>> Edit([FromQuery] string text, TaskModelStatus status, int id, CancellationToken cancellationToken = default)
         {
             var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
             if (task == null)
