@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+
 namespace BeeJee.TestTask.Backend.Dto
 {
     public enum ResponseStatus
